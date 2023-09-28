@@ -5,14 +5,14 @@ import User from "../models/User.js";
 
 // Helper function for generating access tokens
 const generateAccessToken = (userId, roles) => {
-  return jwt.sign({ userId, roles }, process.env.ACCESS_TOKEN_SECRET || "accessTokenSecret", {
+  return jwt.sign({ userId, roles }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "1h",
   });
 };
 
 // Helper function for generating refresh tokens
 const generateRefreshToken = (userId) => {
-  return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET || "refreshTokenSecret", {
+  return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: "7d",
   });
 };
@@ -83,7 +83,7 @@ export const refresh = (req, res) => {
 
   const refreshToken = cookies.refreshToken;
 
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "refreshTokenSecret", async (err, decoded) => {
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
     if (err) return res.status(403).json({ message: "Forbidden" });
 
     const foundUser = await User.findById(decoded.userId);

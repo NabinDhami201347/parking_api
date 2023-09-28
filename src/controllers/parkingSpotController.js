@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
+
 import ParkingSpot from "../models/ParkingSpot.js";
 
 export const createParkingSpot = async (req, res) => {
   try {
+    const ownerId = req.user.userId;
     const { name, description, location, spotType, pricePerHour, capacity, features, imageUrls } = req.body;
 
     if (!name || !location || !spotType || !pricePerHour || !capacity) {
@@ -18,6 +20,7 @@ export const createParkingSpot = async (req, res) => {
       capacity,
       features,
       imageUrls,
+      owner: ownerId,
     });
 
     await parkingSpot.save();
@@ -30,8 +33,8 @@ export const createParkingSpot = async (req, res) => {
 
 export const getParkingSpots = async (req, res) => {
   try {
-    const parkingSpots = await ParkingSpot.find();
-    res.status(200).json({ data: parkingSpots });
+    const spots = await ParkingSpot.find();
+    res.status(200).json({ spots });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching parking spots", error: error.message });
@@ -45,12 +48,12 @@ export const getParkingSpot = async (req, res) => {
       return res.status(400).json({ message: "Invalid parkingSpot ID" });
     }
 
-    const parkingSpot = await ParkingSpot.findById(id);
-    if (!parkingSpot) {
+    const spot = await ParkingSpot.findById(id);
+    if (!spot) {
       return res.status(404).json({ message: "Parking spot not found" });
     }
 
-    res.status(200).json({ data: parkingSpot });
+    res.status(200).json({ spot });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching parking spot", error: error.message });
@@ -64,8 +67,8 @@ export const updateParkingSpot = async (req, res) => {
       return res.status(400).json({ message: "Invalid parkingSpot ID" });
     }
 
-    const parkingSpot = await ParkingSpot.findById(id);
-    if (!parkingSpot) {
+    const spot = await ParkingSpot.findById(id);
+    if (!spot) {
       return res.status(404).json({ message: "Parking spot not found" });
     }
 
@@ -73,22 +76,22 @@ export const updateParkingSpot = async (req, res) => {
 
     for (const field of updateFields) {
       if (req.body[field] !== undefined) {
-        parkingSpot[field] = req.body[field];
+        spot[field] = req.body[field];
       }
     }
 
     // Handle capacity separately since it's an object
     if (req.body.capacity) {
       if (req.body.capacity.car !== undefined) {
-        parkingSpot.capacity.car = req.body.capacity.car;
+        spot.capacity.car = req.body.capacity.car;
       }
       if (req.body.capacity.bike !== undefined) {
-        parkingSpot.capacity.bike = req.body.capacity.bike;
+        spot.capacity.bike = req.body.capacity.bike;
       }
     }
 
-    await parkingSpot.save();
-    res.status(200).json({ message: "Parking spot updated successfully", data: parkingSpot });
+    await spot.save();
+    res.status(200).json({ message: "Parking spot updated successfully", spot });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error updating parking spot", error: error.message });
@@ -102,12 +105,12 @@ export const deleteParkingSpot = async (req, res) => {
       return res.status(400).json({ message: "Invalid parkingSpot ID" });
     }
 
-    const deletedParkingSpot = await ParkingSpot.findByIdAndDelete(id);
-    if (!deletedParkingSpot) {
+    const spot = await ParkingSpot.findByIdAndDelete(id);
+    if (!spot) {
       return res.status(404).json({ message: "Parking spot not found" });
     }
 
-    res.status(200).json({ message: "Parking spot deleted successfully", data: deletedParkingSpot });
+    res.status(200).json({ message: "Parking spot deleted successfully", spot });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error deleting parking spot", error: error.message });
