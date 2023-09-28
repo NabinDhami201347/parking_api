@@ -3,6 +3,20 @@ import jwt from "jsonwebtoken";
 
 import User from "../models/User.js";
 
+// Helper function for generating access tokens
+const generateAccessToken = (userId, role) => {
+  return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET || "accessTokenSecret", {
+    expiresIn: "1h",
+  });
+};
+
+// Helper function for generating refresh tokens
+const generateRefreshToken = (userId) => {
+  return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET || "refreshTokenSecret", {
+    expiresIn: "7d",
+  });
+};
+
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -16,13 +30,13 @@ export const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    const user = await User.create({ name, email, password: hashedPassword });
 
-    return res.status(201).json({ message: `New user ${name} created` });
+    // Omit the password field from the response JSON
+    const userWithoutPassword = { ...user._doc };
+    delete userWithoutPassword.password;
+
+    return res.status(201).json({ user: userWithoutPassword });
   } catch (error) {
     console.error("Error creating a new user:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -32,14 +46,13 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "No user exits with this email" });
+      return res.status(404).json({ message: "No user exists with this email" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -47,19 +60,14 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Credentials don't match" });
     }
 
-    const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || "mysecret", {
-      expiresIn: "1h",
-    });
-    const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || "mysecret", {
-      expiresIn: "7d",
-    });
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
 
-    // Create secure cookie with refresh token
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true, //accessible only by web server
-      secure: true, //https
-      sameSite: "None", //cross-site cookie
-      maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match rT
+      httpOnly: true,
+      secure: false, // Set to false for localhost development
+      sameSite: "None", // Cross-site cookie
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiry: set to match refreshToken
     });
 
     return res.status(200).json({ accessToken });
@@ -67,4 +75,27 @@ export const loginUser = async (req, res) => {
     console.error("Error during login:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export const refresh = (req, res) => {
+  const cookies = req.cookies;
+  if (!cookies?.refreshToken) return res.status(401).json({ message: "Unauthorized" });
+
+  const refreshToken = cookies.refreshToken;
+
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "refreshTokenSecret", async (err, decoded) => {
+    if (err) return res.status(403).json({ message: "Forbidden" });
+
+    const foundUser = await User.findById(decoded.userId);
+    if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
+
+    const accessToken = generateAccessToken(foundUser._id, foundUser.role);
+
+    res.json({ accessToken });
+  });
+};
+
+export const logout = (req, res) => {
+  res.clearCookie("refreshToken", { httpOnly: true, sameSite: "None", secure: true });
+  res.json({ message: "Cookie cleared" });
 };
