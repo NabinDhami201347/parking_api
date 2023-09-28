@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 // Helper function for generating access tokens
-const generateAccessToken = (userId, role) => {
-  return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET || "accessTokenSecret", {
+const generateAccessToken = (userId, roles) => {
+  return jwt.sign({ userId, roles }, process.env.ACCESS_TOKEN_SECRET || "accessTokenSecret", {
     expiresIn: "1h",
   });
 };
@@ -60,7 +60,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Credentials don't match" });
     }
 
-    const accessToken = generateAccessToken(user._id, user.role);
+    const accessToken = generateAccessToken(user._id, user.roles);
     const refreshToken = generateRefreshToken(user._id);
 
     res.cookie("refreshToken", refreshToken, {
@@ -89,7 +89,7 @@ export const refresh = (req, res) => {
     const foundUser = await User.findById(decoded.userId);
     if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
 
-    const accessToken = generateAccessToken(foundUser._id, foundUser.role);
+    const accessToken = generateAccessToken(foundUser._id, foundUser.roles);
 
     res.json({ accessToken });
   });

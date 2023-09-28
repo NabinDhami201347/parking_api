@@ -54,15 +54,11 @@ export const createReservation = async (req, res) => {
 
     // Calculate the total cost based on the hourly rate and duration
     const durationInHours = (eT - sT) / (60 * 60 * 1000);
-
     if (isNaN(durationInHours) || durationInHours < 0) {
       return res.status(400).json({ message: "Invalid time range" });
     }
 
-    console.log("Duration in hours:", durationInHours);
-
     const totalCost = pricePerHour * durationInHours;
-    console.log("Total cost:", totalCost);
 
     const reservation = new Reservation({
       parkingSpot: parkingSpotId,
@@ -99,7 +95,6 @@ export const getReservations = async (req, res) => {
       })
       .populate({
         path: "customer",
-        select: "_id name email",
       });
 
     res.status(200).json({ data: reservations });
@@ -118,14 +113,20 @@ export const getReservation = async (req, res) => {
 
     const reservation = await Reservation.findById(id)
       .populate({
+        path: "customer",
+        select: "_id name email",
+      })
+      .populate({
         path: "parkingSpot",
+        select: "_id name location pricePerHour",
       })
       .populate({
         path: "vehicle",
-      })
-      .populate({
-        path: "customer",
-        select: "_id name email",
+        select: "_id model licensePlate vehicleType",
+        populate: {
+          path: "owner",
+          select: "_id name email",
+        },
       });
 
     if (!reservation) {
