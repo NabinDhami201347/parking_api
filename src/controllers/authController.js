@@ -95,6 +95,13 @@ export const refresh = (req, res) => {
   });
 };
 
+export const profile = async (req, res) => {
+  const userId = req.user.userId;
+
+  const user = await User.findById(userId);
+  return res.json({ user });
+};
+
 export const logout = (req, res) => {
   res.clearCookie("refreshToken", { httpOnly: true, sameSite: "None", secure: true });
   res.json({ message: "Cookie cleared" });
