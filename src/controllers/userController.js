@@ -23,6 +23,10 @@ export const getUsers = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid vehicle ID" });
+    }
+
     const user = await User.findById(userId).select("-password").populate({ path: "reservations" });
     if (!user) {
       return res.status(404).json({ message: "User not found" });

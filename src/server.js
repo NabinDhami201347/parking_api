@@ -1,7 +1,8 @@
-import dotenv from "dotenv";
-import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
+import express from "express";
+import dotenv from "dotenv";
+import morgan from "morgan";
+import cors from "cors";
 
 import connectToDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -18,6 +19,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 

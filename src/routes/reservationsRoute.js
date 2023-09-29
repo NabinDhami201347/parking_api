@@ -11,7 +11,6 @@ import {
 
 const router = express.Router();
 
-router.use(authenticate);
 router.post("/", authenticate, createReservation);
 router.get("/", getReservations);
 router.get("/:id", getReservation);
