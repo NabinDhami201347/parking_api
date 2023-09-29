@@ -2,6 +2,24 @@ import mongoose from "mongoose";
 
 import User from "../models/User.js";
 
+export const getUsers = async (req, res) => {
+  try {
+    const customers = await User.find({ roles: { $nin: ["admin"] } })
+      .select("-password")
+      .populate({ path: "reservations" })
+      .populate({ path: "vehicles" });
+
+    if (!customers || customers.length === 0) {
+      return res.status(404).json({ message: "No customers found" });
+    }
+
+    res.json({ customers });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getUser = async (req, res) => {
   try {
     const userId = req.params.id;

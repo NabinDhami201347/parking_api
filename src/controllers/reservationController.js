@@ -7,11 +7,11 @@ import User from "../models/User.js";
 
 export const createReservation = async (req, res) => {
   try {
-    const { parkingSpotId, vehicleId, startTime, endTime } = req.body;
+    const { parkingSpotId, vehicleId, startTime, endTime, arrivalTime } = req.body;
     const customerId = req.user.userId;
 
-    if (!parkingSpotId || !vehicleId || !startTime || !endTime) {
-      return res.status(400).json({ message: "MAll Fields are required" });
+    if (!parkingSpotId || !vehicleId || !startTime || !endTime || !arrivalTime) {
+      return res.status(400).json({ message: "All Fields are required" });
     }
 
     const parkingSpot = await ParkingSpot.findById(parkingSpotId);
@@ -66,8 +66,15 @@ export const createReservation = async (req, res) => {
       vehicle: vehicleId,
       startTime: sT,
       endTime: eT,
+      arrivalTime,
       totalCost,
     });
+
+    if (reservation.arrivalTime <= reservation.startTime) {
+      reservation.status = "Confirmed";
+    } else {
+      reservation.status = "Pending";
+    }
 
     await reservation.save();
 

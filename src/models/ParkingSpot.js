@@ -15,7 +15,7 @@ const parkingSpotSchema = new mongoose.Schema(
     },
     spotType: {
       type: String,
-      enum: ["Indoor", "Open", "Electric", "Other"],
+      enum: ["Indoor", "Open"],
       default: "Open",
     },
     pricePerHour: {
@@ -45,6 +45,12 @@ const parkingSpotSchema = new mongoose.Schema(
         "Handicapped Accessible",
         "Truck Parking",
         "Guest Parking",
+        "Close to Shopping",
+        "Security Patrolling",
+        "Solar-Powered",
+        "Elevator Access",
+        "Security Access Control",
+        "Motorcycle & Bicycle Only",
       ],
       default: [],
     },
