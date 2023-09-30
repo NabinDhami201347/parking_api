@@ -40,6 +40,15 @@ export const getParkingSpots = async (req, res) => {
     res.status(500).json({ message: "Error fetching parking spots", error: error.message });
   }
 };
+export const getTotalSpots = async (req, res) => {
+  try {
+    const total = await ParkingSpot.countDocuments();
+    res.status(200).json({ total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching total parking spot", error: error.message });
+  }
+};
 
 export const getParkingSpot = async (req, res) => {
   try {

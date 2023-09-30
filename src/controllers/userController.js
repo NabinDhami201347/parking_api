@@ -19,15 +19,43 @@ export const getUsers = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+export const getTotalCustomers = async (req, res) => {
+  try {
+    const total = await User.countDocuments({ roles: { $nin: ["admin", "owner"] } });
+
+    res.json({ total });
+  } catch (error) {
+    console.error("Error fetching total users:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const getUser = async (req, res) => {
   try {
     const userId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid vehicle ID" });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    const user = await User.findById(userId).select("-password").populate({ path: "reservations" });
+    const user = await User.findById(userId)
+      .select("-password")
+      .populate([
+        {
+          path: "vehicles",
+        },
+        {
+          path: "reservations",
+          populate: [
+            {
+              path: "parkingSpot",
+            },
+            {
+              path: "vehicle",
+            },
+          ],
+        },
+      ]);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

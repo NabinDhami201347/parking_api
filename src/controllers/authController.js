@@ -76,6 +76,42 @@ export const loginUser = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+export const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "No user exists with this email" });
+    }
+    if (!user.roles.includes("admin")) {
+      return res.status(401).json({ message: "You are not assigned as admin" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Credentials don't match" });
+    }
+
+    const accessToken = generateAccessToken(user._id, user.roles);
+    const refreshToken = generateRefreshToken(user._id);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // Set to false for localhost development
+      sameSite: "None", // Cross-site cookie
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiry: set to match refreshToken
+    });
+
+    return res.status(200).json({ accessToken });
+  } catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const refresh = (req, res) => {
   const cookies = req.cookies;

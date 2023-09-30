@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Vehicle from "../models/Vehicle.js";
+import User from "../models/User.js";
 
 export const createVehicle = async (req, res) => {
   try {
@@ -9,6 +10,11 @@ export const createVehicle = async (req, res) => {
     if (!model || !licensePlate || !vehicleType) {
       return res.status(400).json({ message: "All fields are required" });
     }
+    const owner = await User.findById(ownerId);
+
+    if (!owner) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     const vehicle = new Vehicle({
       owner: ownerId,
@@ -17,6 +23,8 @@ export const createVehicle = async (req, res) => {
       vehicleType,
     });
 
+    owner.vehicles.push(vehicle._id);
+    await owner.save();
     await vehicle.save();
     res.status(201).json({ message: "Vehicle created successfully", data: vehicle });
   } catch (error) {
@@ -32,6 +40,15 @@ export const getVehicles = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching vehicles", error: error.message });
+  }
+};
+export const getTotalVehicles = async (req, res) => {
+  try {
+    const total = await Vehicle.countDocuments();
+    res.status(200).json({ total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching  total vehicles", error: error.message });
   }
 };
 

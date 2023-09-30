@@ -79,12 +79,13 @@ export const createReservation = async (req, res) => {
     await reservation.save();
 
     parkingSpot.reservations[vehicleType].push(reservation._id);
+    parkingSpot.revenue += totalCost;
     await parkingSpot.save();
 
     customer.reservations.push(reservation._id);
     await customer.save();
 
-    res.status(201).json({ message: "Reservation created successfully", data: reservation });
+    res.status(201).json({ message: "Reservation created successfully", reservation });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating reservation", error: error.message });
@@ -104,7 +105,7 @@ export const getReservations = async (req, res) => {
         path: "customer",
       });
 
-    res.status(200).json({ data: reservations });
+    res.status(200).json({ reservations });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching reservations", error: error.message });
@@ -147,6 +148,16 @@ export const getReservation = async (req, res) => {
   }
 };
 
+export const getTotalReservations = async (req, res) => {
+  try {
+    const total = await Reservation.countDocuments();
+    res.status(200).json({ total });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching total reservations", error: error.message });
+  }
+};
+
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
@@ -168,16 +179,25 @@ export const updateReservation = async (req, res) => {
     }
 
     const pricePerHour = parkingSpot.pricePerHour;
-    const durationInHours = (endTime - startTime) / (60 * 60 * 1000);
+
+    // Convert startTime and endTime to Date objects
+    const startTimeDate = new Date(startTime);
+    const endTimeDate = new Date(endTime);
+
+    const durationInHours = (endTimeDate - startTimeDate) / (60 * 60 * 1000);
+
     const totalCost = pricePerHour * durationInHours;
 
     // Update specific fields
     reservation.parkingSpot = parkingSpotId;
     reservation.vehicle = vehicleId;
-    reservation.startTime = startTime;
-    reservation.endTime = endTime;
+    reservation.startTime = startTimeDate;
+    reservation.endTime = endTimeDate;
     reservation.totalCost = totalCost;
 
+    parkingSpot.revenue += totalCost;
+
+    await parkingSpot.save();
     await reservation.save();
     res.status(200).json({ message: "Reservation updated successfully", data: reservation });
   } catch (error) {
