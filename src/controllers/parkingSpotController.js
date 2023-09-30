@@ -81,7 +81,7 @@ export const updateParkingSpot = async (req, res) => {
       return res.status(404).json({ message: "Parking spot not found" });
     }
 
-    const updateFields = ["name", "description", "location", "pricePerHour", "features", "imageUrls"];
+    const updateFields = ["name", "available", "description", "location", "pricePerHour", "features", "imageUrls"];
 
     for (const field of updateFields) {
       if (req.body[field] !== undefined) {
@@ -98,6 +98,28 @@ export const updateParkingSpot = async (req, res) => {
         spot.capacity.bike = req.body.capacity.bike;
       }
     }
+
+    await spot.save();
+    res.status(200).json({ message: "Parking spot updated successfully", spot });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating parking spot", error: error.message });
+  }
+};
+
+export const updateAvaliability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid parkingSpot ID" });
+    }
+
+    const spot = await ParkingSpot.findById(id);
+    if (!spot) {
+      return res.status(404).json({ message: "Parking spot not found" });
+    }
+
+    spot.available = !spot.available;
 
     await spot.save();
     res.status(200).json({ message: "Parking spot updated successfully", spot });

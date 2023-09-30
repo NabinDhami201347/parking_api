@@ -10,6 +10,7 @@ import {
   getTotalSpots,
   getParkingSpots,
   updateParkingSpot,
+  updateAvaliability,
 } from "../controllers/parkingSpotController.js";
 
 const router = express.Router();
@@ -19,6 +20,8 @@ router.post("/", authenticate, authorize, createParkingSpot);
 router.get("/", getParkingSpots);
 router.get("/total", getTotalSpots);
 router.get("/:id", getParkingSpot);
+
+router.put("/:id/avaliability", updateAvaliability);
 
 router.put("/:id", updateParkingSpot);
 router.delete("/:id", authenticate, authorize, deleteParkingSpot);

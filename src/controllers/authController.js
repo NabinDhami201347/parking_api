@@ -6,7 +6,7 @@ import User from "../models/User.js";
 // Helper function for generating access tokens
 const generateAccessToken = (userId, roles) => {
   return jwt.sign({ userId, roles }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
 };
 

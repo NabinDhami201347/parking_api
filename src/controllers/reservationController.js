@@ -7,10 +7,11 @@ import User from "../models/User.js";
 
 export const createReservation = async (req, res) => {
   try {
-    const { parkingSpotId, vehicleId, startTime, endTime, arrivalTime } = req.body;
+    let vehicle;
+    const { parkingSpotId, startTime, endTime, arrivalTime } = req.body;
     const customerId = req.user.userId;
 
-    if (!parkingSpotId || !vehicleId || !startTime || !endTime || !arrivalTime) {
+    if (!parkingSpotId || !startTime || !endTime || !arrivalTime) {
       return res.status(400).json({ message: "All Fields are required" });
     }
 
@@ -19,14 +20,18 @@ export const createReservation = async (req, res) => {
       return res.status(404).json({ message: "Parking spot not found" });
     }
 
-    const vehicle = await Vehicle.findById(vehicleId);
-    if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
-    }
-
-    const customer = await User.findById(customerId);
+    const customer = await User.findById(customerId).populate({ path: "vehicles" });
     if (!customer) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    if (req.body.vehicleId) {
+      vehicle = await Vehicle.findById(req.body.vehicleId);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+    } else {
+      vehicle = customer.vehicles[0];
     }
 
     const vehicleType = vehicle.vehicleType;
@@ -63,7 +68,7 @@ export const createReservation = async (req, res) => {
     const reservation = new Reservation({
       parkingSpot: parkingSpotId,
       customer: customerId,
-      vehicle: vehicleId,
+      vehicle: vehicle._id,
       startTime: sT,
       endTime: eT,
       arrivalTime,
