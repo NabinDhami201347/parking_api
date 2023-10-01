@@ -134,7 +134,21 @@ export const refresh = (req, res) => {
 export const profile = async (req, res) => {
   const userId = req.user.userId;
 
-  const user = await User.findById(userId);
+  const user = await User.findById(userId)
+    .select("name")
+    .populate({ path: "vehicles" })
+    .select("model licensePlate vehicleType")
+    .populate({
+      path: "reservations",
+      populate: [
+        {
+          path: "parkingSpot",
+        },
+        {
+          path: "vehicle",
+        },
+      ],
+    });
   return res.json({ user });
 };
 

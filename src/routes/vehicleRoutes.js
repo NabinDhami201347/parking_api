@@ -9,6 +9,7 @@ import {
   getTotalVehicles,
   updateVehicle,
   deleteVehicle,
+  getUserVehicles,
 } from "../controllers/vehicleController.js";
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get("/total", getTotalVehicles);
 router.get("/:id", getVehicle);
 
 router.put("/:id", authenticate, updateVehicle);
+router.get("/u/p", authenticate, getUserVehicles);
 router.delete("/:id", authenticate, authorize, deleteVehicle);
 
 export default router;

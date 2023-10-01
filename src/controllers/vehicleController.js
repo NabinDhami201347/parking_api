@@ -42,6 +42,23 @@ export const getVehicles = async (req, res) => {
     res.status(500).json({ message: "Error fetching vehicles", error: error.message });
   }
 };
+
+// export const getVehiclesByUser = async (req, res) => {
+//   const userId = req.user.userId;
+
+//   if (!mongoose.Types.ObjectId.isValid(userId)) {
+//     return res.status(400).json({ message: "Invalid user id" });
+//   }
+
+//   try {
+//     const vehicle = await Vehicle.find({ owner: userId });
+//     res.status(200).json({ vehicle });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Error fetching vehicles", error: error.message });
+//   }
+// };
+
 export const getTotalVehicles = async (req, res) => {
   try {
     const total = await Vehicle.countDocuments();
@@ -113,6 +130,16 @@ export const deleteVehicle = async (req, res) => {
     }
 
     res.status(200).json({ message: "Vehicle deleted successfully", data: deletedVehicle });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting vehicle", error: error.message });
+  }
+};
+
+export const getUserVehicles = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({ owner: req.user.userId });
+    res.status(200).json({ vehicles });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error deleting vehicle", error: error.message });
