@@ -30,7 +30,6 @@ app.use("/spots", spotsRoutes);
 app.use("/vehicles", vehiclesRoutes);
 app.use("/reservations", reservationsRoutes);
 
-// Define an async function to start the server and connect to the database
 async function startServer() {
   try {
     await connectToDB();

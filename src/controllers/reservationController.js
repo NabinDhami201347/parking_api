@@ -224,6 +224,20 @@ export const deleteReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
+    // Update the User model to remove the reference to the reservation
+    await User.updateOne({ _id: deletedReservation.customer }, { $pull: { reservations: id } });
+
+    // Update the ParkingSpot model to remove the reference to the reservation in both car and bike arrays
+    await ParkingSpot.updateOne(
+      { _id: deletedReservation.parkingSpot },
+      {
+        $pull: {
+          "reservations.car": id,
+          "reservations.bike": id,
+        },
+      }
+    );
+
     res.status(200).json({ message: "Reservation deleted successfully", data: deletedReservation });
   } catch (error) {
     console.error(error);

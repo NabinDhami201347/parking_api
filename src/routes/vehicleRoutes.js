@@ -22,6 +22,6 @@ router.get("/:id", getVehicle);
 
 router.put("/:id", authenticate, updateVehicle);
 router.get("/u/p", authenticate, getUserVehicles);
-router.delete("/:id", authenticate, authorize, deleteVehicle);
+router.delete("/:id", authenticate, deleteVehicle);
 
 export default router;
