@@ -6,7 +6,7 @@ import User from "../models/User.js";
 // Helper function for generating access tokens
 const generateAccessToken = (userId, roles) => {
   return jwt.sign({ userId, roles }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1d",
+    expiresIn: "1h",
   });
 };
 
@@ -63,14 +63,7 @@ export const loginUser = async (req, res) => {
     const accessToken = generateAccessToken(user._id, user.roles);
     const refreshToken = generateRefreshToken(user._id);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false, // Set to false for localhost development
-      sameSite: "None", // Cross-site cookie
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiry: set to match refreshToken
-    });
-
-    return res.status(200).json({ accessToken });
+    return res.status(200).json({ accessToken, refreshToken });
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -114,10 +107,9 @@ export const loginAdmin = async (req, res) => {
 };
 
 export const refresh = (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.refreshToken) return res.status(401).json({ message: "Unauthorized" });
+  const refreshToken = req.body.refreshToken;
 
-  const refreshToken = cookies.refreshToken;
+  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
 
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
     if (err) return res.status(403).json({ message: "Forbidden" });

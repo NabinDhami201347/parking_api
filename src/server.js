@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -15,14 +14,12 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN,
-  credentials: true,
+  origin: [process.env.UI_ORIGIN, process.env.ADMIN_ORIGIN],
 };
 
 app.use(cors(corsOptions));
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(cookieParser());
 
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);

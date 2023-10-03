@@ -1,11 +1,7 @@
 ```sh
-npm init -y
+cd parking_api && ./configure.sh
 ```
 
-```sh
-npx gitignore node
 ```
-
-```sh
-npm i nodemon -D
+npm run dev
 ```

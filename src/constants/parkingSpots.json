@@ -11,7 +11,7 @@
         "car": 200,
         "bike": 40
       },
-      "features": ["Security Cameras", "Covered", "EV Charging", "Close to Shopping"],
+      "features": ["Security Cameras", "EV Charging"],
      "imageUrls": [
         "https://images.pexels.com/photos/1000633/pexels-photo-1000633.jpeg?auto=compress&cs=tinysrgb&w=600"
       ]
@@ -62,7 +62,7 @@
         "car": 80,
         "bike": 10
       },
-      "features": ["Covered","Security Access Control"],
+      "features": ["Covered","Security Access"],
      "imageUrls": [
         "https://jooinn.com/images/empty-parking-1.png"
       ]
@@ -113,9 +113,7 @@
         "car": 10,
         "bike": 22
       },
-      "features": ["Close to Shopping",
-      "Security Patrolling",
-      "Solar-Powered"],
+      "features": ["Close to Shopping", "Solar-Powered"],
      "imageUrls": [
         "https://images.pexels.com/photos/2220292/pexels-photo-2220292.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
       ]
@@ -132,9 +130,7 @@
         "car": 60,
         "bike": 120
       },
-      "features": ["Spacious",
-      "Motorcycle Only",
-      "Scenic View"],
+      "features": ["Scenic View"],
      "imageUrls": [
         "https://images.pexels.com/photos/2655864/pexels-photo-2655864.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
       ]
@@ -151,9 +147,7 @@
         "car": 30,
         "bike": 90
       },
-      "features": ["Guest Parking",
-      "Close to Shopping",
-      "Security Patrolling"],
+      "features": ["Guest Parking","Close to Shopping"],
      "imageUrls": [
         "https://images.pexels.com/photos/2868985/pexels-photo-2868985.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
       ]
