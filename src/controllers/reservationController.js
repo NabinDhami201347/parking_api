@@ -211,6 +211,29 @@ export const updateReservation = async (req, res) => {
   }
 };
 
+export const updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid reservation ID" });
+    }
+
+    const reservation = await Reservation.findOne({ _id: id });
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    reservation.status = status;
+    await reservation.save();
+    res.status(200).json({ message: "Reservation updated successfully", data: reservation });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating reservation", error: error.message });
+  }
+};
+
 export const deleteReservation = async (req, res) => {
   try {
     const { id } = req.params;

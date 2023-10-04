@@ -8,6 +8,7 @@ import {
   updateReservation,
   deleteReservation,
   getTotalReservations,
+  updateStatus,
 } from "../controllers/reservationController.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get("/", getReservations);
 router.get("/total", getTotalReservations);
 router.get("/:id", getReservation);
 router.put("/:id", updateReservation);
+router.put("/:id/status", updateStatus);
 router.delete("/:id", deleteReservation);
 
 export default router;

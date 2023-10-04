@@ -92,14 +92,7 @@ export const loginAdmin = async (req, res) => {
     const accessToken = generateAccessToken(user._id, user.roles);
     const refreshToken = generateRefreshToken(user._id);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false, // Set to false for localhost development
-      sameSite: "None", // Cross-site cookie
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiry: set to match refreshToken
-    });
-
-    return res.status(200).json({ accessToken });
+    return res.status(200).json({ accessToken, refreshToken });
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({ message: "Internal server error" });
