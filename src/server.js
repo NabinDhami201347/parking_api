@@ -10,6 +10,9 @@ import spotsRoutes from "./routes/parkingSpotRoutes.js";
 import vehiclesRoutes from "./routes/vehicleRoutes.js";
 import reservationsRoutes from "./routes/reservationsRoute.js";
 
+import parkingRoutes from "./routes/parkingRoute.js";
+import paymentRoutes from "./routes/paymentRoute.js";
+
 dotenv.config();
 const app = express();
 
@@ -24,6 +27,8 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/spots", spotsRoutes);
+app.use("/payments", paymentRoutes);
+app.use("/parkings", parkingRoutes);
 app.use("/vehicles", vehiclesRoutes);
 app.use("/reservations", reservationsRoutes);
 

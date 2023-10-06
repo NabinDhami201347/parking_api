@@ -200,9 +200,6 @@ export const updateReservation = async (req, res) => {
     reservation.endTime = endTimeDate;
     reservation.totalCost = totalCost;
 
-    parkingSpot.revenue += totalCost;
-
-    await parkingSpot.save();
     await reservation.save();
     res.status(200).json({ message: "Reservation updated successfully", data: reservation });
   } catch (error) {
