@@ -1,6 +1,7 @@
 import express from "express";
 
 import authenticate from "../middlewares/authMiddleware.js";
+import authorize from "../middlewares/adminMiddleware.js";
 import {
   createReservation,
   getReservations,
@@ -14,11 +15,11 @@ import {
 const router = express.Router();
 
 router.post("/", authenticate, createReservation);
-router.get("/", getReservations);
-router.get("/total", getTotalReservations);
-router.get("/:id", getReservation);
-router.put("/:id", updateReservation);
-router.put("/:id/status", updateStatus);
-router.delete("/:id", deleteReservation);
+router.get("/", authenticate, getReservations);
+router.get("/total", authenticate, authorize, getTotalReservations);
+router.get("/:id", authenticate, getReservation);
+router.put("/:id", authenticate, updateReservation);
+router.put("/:id/status", authenticate, authorize, updateStatus);
+router.delete("/:id", authenticate, deleteReservation);
 
 export default router;

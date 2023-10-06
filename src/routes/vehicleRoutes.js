@@ -16,9 +16,9 @@ const router = express.Router();
 
 router.post("/", authenticate, createVehicle);
 
-router.get("/", getVehicles);
-router.get("/total", getTotalVehicles);
-router.get("/:id", getVehicle);
+router.get("/", authenticate, getVehicles);
+router.get("/total", authenticate, authorize, getTotalVehicles);
+router.get("/:id", authenticate, authorize, getVehicle);
 
 router.put("/:id", authenticate, updateVehicle);
 router.get("/u/p", authenticate, getUserVehicles);

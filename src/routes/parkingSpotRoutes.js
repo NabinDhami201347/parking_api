@@ -18,12 +18,12 @@ const router = express.Router();
 router.post("/", authenticate, authorize, createParkingSpot);
 
 router.get("/", getParkingSpots);
-router.get("/total", getTotalSpots);
 router.get("/:id", getParkingSpot);
+router.get("/p/total", getTotalSpots);
 
-router.put("/:id/avaliability", updateAvaliability);
+router.put("/:id/avaliability", authenticate, authorize, updateAvaliability);
 
-router.put("/:id", updateParkingSpot);
+router.put("/:id", authenticate, authorize, updateParkingSpot);
 router.delete("/:id", authenticate, authorize, deleteParkingSpot);
 
 export default router;
