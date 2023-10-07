@@ -83,12 +83,7 @@ export const validatePaymentAndExit = async (req, res) => {
 
 export const getParkings = async (req, res) => {
   try {
-    const parkings = await Parking.find().populate({
-      path: "reservation",
-      populate: {
-        path: "parkingSpot",
-      },
-    });
+    const parkings = await Parking.find().populate("payment");
 
     res.status(200).json({ parkings });
   } catch (error) {
@@ -111,18 +106,38 @@ export const getParking = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const parking = await Parking.findById(id).populate({
-      path: "reservation",
-      populate: {
-        path: "parkingSpot",
-      },
-    });
+    const parking = await Parking.findById(id)
+      .populate({
+        path: "reservation",
+      })
+      .populate("payment");
 
     if (!parking) {
       return res.status(404).json({ message: "Parking entry not found" });
     }
 
     res.status(200).json({ parking });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+export const getParkingByUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const parking = await Parking.find({})
+      .populate({
+        path: "reservation",
+      })
+      .populate("payment");
+
+    const filteredParking = parking.filter((entry) => entry.reservation.customer.toString() === userId);
+    if (filteredParking.length === 0) {
+      return res.status(404).json({ message: "Parking entry not found" });
+    }
+
+    res.status(200).json({ parking: filteredParking });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

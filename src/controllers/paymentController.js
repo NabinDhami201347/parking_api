@@ -27,10 +27,12 @@ export const createPayment = async (req, res) => {
     }
 
     let paymentStatus;
+    let remainingAmount;
     if (Math.abs(parking.totalAmount - amount) < 0.01) {
       parking.status = "Exited";
       paymentStatus = "Successful";
     } else {
+      remainingAmount = parking.totalAmount - amount;
       parking.status = "Payment Pending";
       paymentStatus = "Partially";
     }
@@ -40,6 +42,7 @@ export const createPayment = async (req, res) => {
       parking: parkingId,
       paymentMethod,
       paymentStatus,
+      remainingAmount,
     });
     await payment.save();
 
@@ -93,16 +96,46 @@ export const getPayment = async (req, res) => {
 
 export const updatePayment = async (req, res) => {
   const { id } = req.params;
+  let { amount } = req.body;
+
+  // Parse amount into a float
+  amount = parseFloat(amount);
+
+  if (!amount || isNaN(amount) || !id) {
+    return res.status(400).json({ error: "Invalid or missing required fields" });
+  }
+
+  const parking = await Parking.findById(id)
+    .populate({
+      path: "reservation",
+    })
+    .populate("payment");
+
+  if (!parking) {
+    return res.status(404).json({ error: "Parking entry not found" });
+  }
+
+  if (Math.abs(parking.payment.remainingAmount - amount) < 0.01) {
+    parking.status = "Exited";
+    parking.payment.remainingAmount = 0; // Update the remainingAmount within the payment document
+    parking.payment.paymentStatus = "Successful";
+  } else {
+    parking.payment.remainingAmount -= amount; // Update the remainingAmount within the payment document
+    parking.status = "Payment Pending";
+    parking.payment.paymentStatus = "Partially";
+  }
 
   try {
-    const updatedPayment = await Payment.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    // Save the updated parking document
+    await parking.save();
 
-    if (!updatedPayment) {
-      return res.status(404).json({ error: "Payment not found" });
-    }
-    res.status(200).json({ updatedPayment });
+    // Update the referenced payment document
+    await parking.payment.save();
+
+    const parkingSpot = await ParkingSpot.findById(parking.reservation.parkingSpot);
+    parkingSpot.revenue += amount;
+    await parkingSpot.save();
+    res.status(200).json({ parking });
   } catch (error) {
     res.status(500).json({ message: "Error updating payment" });
   }
